@@ -1,11 +1,11 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import './App.css';
 import Home from './Home';
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
-import { Security, SecureRoute, ImplicitCallback } from '@okta/okta-react';
+import {BrowserRouter as Router, Route, Switch} from 'react-router-dom';
+import {Security, SecureRoute, ImplicitCallback} from '@okta/okta-react';
 import CoffeeShopsList from './CoffeeShopsList';
 import CoffeeShopEdit from './CoffeeShopEdit';
-import { withAuth } from '@okta/okta-react';
+import {withAuth} from '@okta/okta-react';
 import Api from './Api';
 import NavBar from './NavBar';
 
@@ -13,7 +13,11 @@ const AuthWrapper = withAuth(class WrappedRoutes extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { authenticated: null, user: null, api: new Api() };
+    this.state = {
+      authenticated: null,
+      user: null,
+      api: new Api()
+    };
     this.checkAuthentication = this.checkAuthentication.bind(this);
   }
 
@@ -23,10 +27,10 @@ const AuthWrapper = withAuth(class WrappedRoutes extends Component {
       if (authenticated) {
         const user = await this.props.auth.getUser();
         let accessToken = await this.props.auth.getAccessToken();
-        this.setState({ authenticated, user, api: new Api(accessToken) });
-      }
-      else {
-        this.setState({ authenticated, user:null, api: new Api() });
+        console.log(accessToken);
+        this.setState({authenticated, user, api: new Api(accessToken)});
+      } else {
+        this.setState({authenticated, user: null, api: new Api()});
       }
     }
   }
@@ -41,11 +45,11 @@ const AuthWrapper = withAuth(class WrappedRoutes extends Component {
 
   async login() {
     if (this.state.authenticated === null) return; // do nothing if auth isn't loaded yet
-    this.props.auth.login('/');
+    await this.props.auth.login('/');
   }
 
   async logout() {
-    this.props.auth.logout('/');
+    await this.props.auth.logout('/');
   }
 
   render() {
@@ -66,16 +70,19 @@ const AuthWrapper = withAuth(class WrappedRoutes extends Component {
         <Route
           path='/'
           exact={true}
-          render={(props) => <Home {...props} authenticated={authenticated} user={user} api={api} navbar={navbar} />}
+          render={(props) => <Home {...props} authenticated={authenticated} user={user} api={api}
+                                   navbar={navbar}/>}
         />
         <SecureRoute
           path='/coffee-shops'
           exact={true}
-          render={(props) => <CoffeeShopsList {...props} authenticated={authenticated} user={user} api={api} navbar={navbar}/>}
+          render={(props) => <CoffeeShopsList {...props} authenticated={authenticated} user={user} api={api}
+                                              navbar={navbar}/>}
         />
         <SecureRoute
           path='/coffee-shops/:id'
-          render={(props) => <CoffeeShopEdit {...props} authenticated={authenticated} user={user} api={api} navbar={navbar}/>}
+          render={(props) => <CoffeeShopEdit {...props} authenticated={authenticated} user={user} api={api}
+                                             navbar={navbar}/>}
         />
       </Switch>
     )
@@ -84,15 +91,23 @@ const AuthWrapper = withAuth(class WrappedRoutes extends Component {
 
 class App extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = {
+      clientId: '0oa9xbsp65ppOT0nA4x6',
+      issuer: 'https://dev-259653.okta.com/oauth2/default'
+    }
+  }
+
   render() {
     return (
       <Router>
-        <Security issuer='https://dev-133320.okta.com/oauth2/default'
-                  clientId='0oa2gmq5jhhsMCCd3357'
+        <Security issuer={this.state.issuer}
+                  clientId={this.state.clientId}
                   redirectUri={window.location.origin + '/implicit/callback'}
                   pkce={true}>
-          <Route path='/implicit/callback' component={ImplicitCallback} />
-          <AuthWrapper />
+          <Route path='/implicit/callback' component={ImplicitCallback}/>
+          <AuthWrapper/>
         </Security>
       </Router>
     )

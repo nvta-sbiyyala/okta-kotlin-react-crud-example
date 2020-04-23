@@ -16,4 +16,4 @@ data class CoffeeShopModel(
         var priceOfCoffee: Double = 0.0,
         var powerAccessible: Boolean = true,
         var internetReliability: Short = 3 // 1-5
-) {}
+)
